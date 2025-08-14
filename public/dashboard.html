@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TimeTrack Dashboard</title>
+    <style>
+      body{font-family:Arial;padding:16px}
+      .row{display:flex;gap:12px}
+      .card{border:1px solid #ddd;padding:12px;border-radius:6px}
+    </style>
+  </head>
+  <body>
+    <h1>TimeTrack Dashboard</h1>
+    <div id="summary">Loading…</div>
+    <h3>Top domains (week)</h3>
+    <div id="list"></div>
+    <script>
+      async function load() {
+        const r = await fetch('/api/summary');
+        const j = await r.json();
+        const agg = j.summary || {};
+        const items = Object.entries(agg).sort((a,b)=>b[1]-a[1]);
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        let total = 0; for (const [,v] of items) total += v;
+        for (const [d,ms] of items.slice(0,50)) {
+          const el = document.createElement('div'); el.className='card';
+          el.textContent = `${d} — ${(ms/1000/60).toFixed(1)}m`;
+          list.appendChild(el);
+        }
+        document.getElementById('summary').textContent = `Total tracked (week): ${(total/1000/60).toFixed(1)} minutes`;
+      }
+      load();
+    </script>
+  </body>
+</html>
